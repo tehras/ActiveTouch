@@ -10,7 +10,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import com.koshkin.tehras.activetouch.fragments.ActiveTouchFragment
-import com.koshkin.tehras.activetouch.views.ActiveTouchLinearLayoutManager
 import java.io.Serializable
 
 /**
@@ -35,30 +34,9 @@ class ActiveTouchBehavior : View.OnTouchListener, ActiveTouchFragment.OnLoadHelp
 
         if (builder.hoverCallback != null)
             activeTouchHoverHelper = ActiveTouchHoverHelper(builder.hoverCallback!!)
-
-        blockRecyclerView()
     }
 
     private var recyclerView: RecyclerView? = null
-
-    private fun blockRecyclerView() {
-
-        var view = builder.v
-        while (view!!.parent != null) {
-            if (view.parent is View) {
-                view = view.parent as View
-                if (view is RecyclerView) {
-                    if (view.layoutManager is ActiveTouchLinearLayoutManager) {//todo include others
-                        Log.d(TAG, "found recycler view")
-                        recyclerView = view
-
-                        break
-                    }
-                }
-            } else
-                break
-        }
-    }
 
     companion object Factory {
         fun builder(v: View): Factory.Builder {
@@ -89,10 +67,17 @@ class ActiveTouchBehavior : View.OnTouchListener, ActiveTouchFragment.OnLoadHelp
             var contentFrag: android.app.Fragment? = null
             var parentView: ViewGroup? = null
             var hoverCallback: OnViewHoverOverListener? = null
+            var blockCallback: BlockScrollableParentListener? = null
 
             @Suppress("unused")
             fun setHoverCallback(callback: OnViewHoverOverListener): Builder {
                 hoverCallback = callback
+                return this
+            }
+
+            @Suppress("unused")
+            fun setBlockScrollableCallback(callback: BlockScrollableParentListener): Builder {
+                blockCallback = callback
                 return this
             }
 
@@ -144,10 +129,8 @@ class ActiveTouchBehavior : View.OnTouchListener, ActiveTouchFragment.OnLoadHelp
 
 
     private fun blockScroll(b: Boolean) {
-        if (recyclerView != null) {
-            if (recyclerView!!.layoutManager is ActiveTouchLinearLayoutManager) {
-                (recyclerView!!.layoutManager as ActiveTouchLinearLayoutManager).blockScroll = b
-            }
+        if (builder.blockCallback != null) {
+            builder.blockCallback!!.onBlock(b)
         }
     }
 
@@ -222,5 +205,10 @@ class ActiveTouchBehavior : View.OnTouchListener, ActiveTouchFragment.OnLoadHelp
     interface OnViewHoverOverListener {
         @Suppress("unused")
         fun onHover(v: View?, isInside: Boolean)
+    }
+
+    interface BlockScrollableParentListener {
+        @Suppress("unused")
+        fun onBlock(b: Boolean)
     }
 }

@@ -3,6 +3,7 @@ package com.koshkin.tehras.activetouchsample
 import android.graphics.Color
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
@@ -10,18 +11,22 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import com.koshkin.tehras.activetouch.touchlisteners.ActiveTouchBehavior
-import com.koshkin.tehras.activetouch.views.ActiveTouchLinearLayoutManager
 
 class MainActivity : AppCompatActivity() {
 
     private var recyclerView: RecyclerView? = null
+    private var blockedScroll = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         recyclerView = findViewById(R.id.recycler_view) as RecyclerView
-        recyclerView!!.layoutManager = ActiveTouchLinearLayoutManager(this)
+        recyclerView!!.layoutManager = object : LinearLayoutManager(this) {
+            override fun canScrollVertically(): Boolean {
+                return !blockedScroll
+            }
+        }
         recyclerView!!.setHasFixedSize(true)
         recyclerView!!.adapter = SampleAdapter(this)
     }
@@ -58,6 +63,12 @@ class MainActivity : AppCompatActivity() {
         Log.d("MainActivity", "addingView")
         ActiveTouchBehavior.builder(v!!)
                 .setContainerView(this.findViewById(R.id.container_view) as ViewGroup)
+                .setBlockScrollableCallback(object : ActiveTouchBehavior.BlockScrollableParentListener {
+                    override fun onBlock(b: Boolean) {
+                        blockedScroll = b
+                    }
+
+                })
                 .setHoverCallback(object : ActiveTouchBehavior.OnViewHoverOverListener {
 
                     override fun onHover(v: View?, isInside: Boolean) {
