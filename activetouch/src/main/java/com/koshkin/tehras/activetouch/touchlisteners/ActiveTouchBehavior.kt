@@ -3,12 +3,14 @@ package com.koshkin.tehras.activetouch.touchlisteners
 import android.os.Handler
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentActivity
+import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import com.koshkin.tehras.activetouch.fragments.ActiveTouchFragment
+import com.koshkin.tehras.activetouch.views.ActiveTouchLinearLayoutManager
 import java.io.Serializable
 
 /**
@@ -33,6 +35,29 @@ class ActiveTouchBehavior : View.OnTouchListener, ActiveTouchFragment.OnLoadHelp
 
         if (builder.hoverCallback != null)
             activeTouchHoverHelper = ActiveTouchHoverHelper(builder.hoverCallback!!)
+
+        blockRecyclerView()
+    }
+
+    private var recyclerView: RecyclerView? = null
+
+    private fun blockRecyclerView() {
+
+        var view = builder.v
+        while (view!!.parent != null) {
+            if (view.parent is View) {
+                view = view.parent as View
+                if (view is RecyclerView) {
+                    if (view.layoutManager is ActiveTouchLinearLayoutManager) {//todo include others
+                        Log.d(TAG, "found recycler view")
+                        recyclerView = view
+
+                        break
+                    }
+                }
+            } else
+                break
+        }
     }
 
     companion object Factory {
@@ -112,6 +137,17 @@ class ActiveTouchBehavior : View.OnTouchListener, ActiveTouchFragment.OnLoadHelp
             builder.v!!.isHapticFeedbackEnabled = true
             builder.v!!.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
             startActiveTouchFragment(builder.parentView!!, builder)
+
+            blockScroll(true)
+        }
+    }
+
+
+    private fun blockScroll(b: Boolean) {
+        if (recyclerView != null) {
+            if (recyclerView!!.layoutManager is ActiveTouchLinearLayoutManager) {
+                (recyclerView!!.layoutManager as ActiveTouchLinearLayoutManager).blockScroll = b
+            }
         }
     }
 
@@ -120,6 +156,8 @@ class ActiveTouchBehavior : View.OnTouchListener, ActiveTouchFragment.OnLoadHelp
             activeTouchHoverHelper?.clearViews()
             activity!!.onBackPressed()
             lastDialog = null
+
+            blockScroll(false)
         }
     }
 
@@ -165,11 +203,12 @@ class ActiveTouchBehavior : View.OnTouchListener, ActiveTouchFragment.OnLoadHelp
             }
             MotionEvent.ACTION_CANCEL -> {
                 isInside = false
+                hidePopup()
                 if (!isShowing())
                     handler.removeCallbacks(mLongPressed)
                 return true
             }
-            MotionEvent.ACTION_MOVE -> return isInside
+            MotionEvent.ACTION_MOVE -> return true
         }
 
         return false

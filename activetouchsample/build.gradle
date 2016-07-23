@@ -36,6 +36,7 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile project(path: ':activetouch')
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    compile 'com.android.support:recyclerview-v7:24.0.0'
 }
 repositories {
     mavenCentral()
