@@ -1,9 +1,7 @@
 package com.koshkin.tehras.activetouch.touchlisteners
 
-import android.os.Handler
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentActivity
-import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
@@ -24,9 +22,7 @@ class ActiveTouchBehavior : View.OnTouchListener, ActiveTouchFragment.OnLoadHelp
     }
 
     private var builder: Builder
-    private val LONG_TAP_THRESHOLD = 250L
     private var activity: FragmentActivity? = null
-    private var lastDialog: ActiveTouchFragment? = null
 
     constructor(activity: FragmentActivity, builder: Builder) {
         this.activity = activity
@@ -35,8 +31,6 @@ class ActiveTouchBehavior : View.OnTouchListener, ActiveTouchFragment.OnLoadHelp
         if (builder.hoverCallback != null)
             activeTouchHoverHelper = ActiveTouchHoverHelper(builder.hoverCallback!!)
     }
-
-    private var recyclerView: RecyclerView? = null
 
     companion object Factory {
         fun builder(v: View): Factory.Builder {
@@ -116,7 +110,7 @@ class ActiveTouchBehavior : View.OnTouchListener, ActiveTouchFragment.OnLoadHelp
         builder.v!!.setOnTouchListener(this)
     }
 
-    private fun startPopup() {
+    fun startPopup() {
         if (builder.parentView != null) {
             //haptic feedback
             builder.v!!.isHapticFeedbackEnabled = true
@@ -127,20 +121,20 @@ class ActiveTouchBehavior : View.OnTouchListener, ActiveTouchFragment.OnLoadHelp
         }
     }
 
-
-    private fun blockScroll(b: Boolean) {
-        if (builder.blockCallback != null) {
-            builder.blockCallback!!.onBlock(b)
-        }
-    }
-
-    private fun hidePopup() {
+    fun hidePopup() {
         if (lastDialog != null && activity != null) {
             activeTouchHoverHelper?.clearViews()
             activity!!.onBackPressed()
             lastDialog = null
 
             blockScroll(false)
+        }
+    }
+
+
+    private fun blockScroll(b: Boolean) {
+        if (builder.blockCallback != null) {
+            builder.blockCallback!!.onBlock(b)
         }
     }
 
@@ -159,48 +153,18 @@ class ActiveTouchBehavior : View.OnTouchListener, ActiveTouchFragment.OnLoadHelp
                 .commit()
     }
 
-    private var isInside: Boolean = false
     private var activeTouchHoverHelper: ActiveTouchHoverHelper? = null
 
     /**
      * Touch Listener
      */
     override fun onTouch(v: View?, ev: MotionEvent): Boolean {
-
-        // this section will keep track of any hover views
         if (builder.hoverCallback != null && activeTouchHoverHelper != null) {
             activeTouchHoverHelper!!.onTouch(ev)
         }
 
-        when (ev.action and MotionEvent.ACTION_MASK) {
-            MotionEvent.ACTION_DOWN -> {
-                isInside = true
-                handler.postDelayed(mLongPressed, LONG_TAP_THRESHOLD)
-                return true
-            }
-            MotionEvent.ACTION_UP -> {
-                isInside = false
-                handler.removeCallbacks(mLongPressed)
-                hidePopup()
-                return true
-            }
-            MotionEvent.ACTION_CANCEL -> {
-                isInside = false
-                hidePopup()
-                if (!isShowing())
-                    handler.removeCallbacks(mLongPressed)
-                return true
-            }
-            MotionEvent.ACTION_MOVE -> return true
-        }
-
-        return false
+        return com.koshkin.tehras.activetouch.touchlisteners.onTouch(ev, v!!, this, mLongPressed)
     }
-
-    private fun isShowing(): Boolean = lastDialog != null
-
-    val handler = Handler()
-    var mLongPressed: Runnable = Runnable { startPopup() }
 
     interface OnViewHoverOverListener {
         @Suppress("unused")
@@ -211,4 +175,6 @@ class ActiveTouchBehavior : View.OnTouchListener, ActiveTouchFragment.OnLoadHelp
         @Suppress("unused")
         fun onBlock(b: Boolean)
     }
+
+    var mLongPressed = Runnable { startPopup() }
 }

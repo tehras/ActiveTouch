@@ -12,7 +12,10 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import com.koshkin.tehras.activetouch.touchlisteners.ActiveTouchBehavior
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), ActiveTouchBehavior.BlockScrollableParentListener {
+    override fun onBlock(b: Boolean) {
+        blockedScroll = b
+    }
 
     private var recyclerView: RecyclerView? = null
     private var blockedScroll = false
@@ -60,15 +63,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun addLongHolder(v: View?) {
-        Log.d("MainActivity", "addingView")
         ActiveTouchBehavior.builder(v!!)
                 .setContainerView(this.findViewById(R.id.container_view) as ViewGroup)
-                .setBlockScrollableCallback(object : ActiveTouchBehavior.BlockScrollableParentListener {
-                    override fun onBlock(b: Boolean) {
-                        blockedScroll = b
-                    }
-
-                })
+                .setBlockScrollableCallback(this)
                 .setHoverCallback(object : ActiveTouchBehavior.OnViewHoverOverListener {
 
                     override fun onHover(v: View?, isInside: Boolean) {
@@ -81,7 +78,8 @@ class MainActivity : AppCompatActivity() {
                     }
 
                 })
-                .setContentFragment(SampleFragment.getInstance()).build(this)
+                .setContentFragment(SampleFragment.getInstance())
+                .build(this)
     }
 
 }
