@@ -1,30 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@android:color/white"
     android:orientation="vertical">
 
     <ImageView
         android:id="@+id/sample_image"
-        android:layout_width="250dp"
-        android:layout_height="250dp"
-        android:layout_gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/button_container"
+        android:scaleType="fitCenter"
         android:src="@drawable/baboon" />
 
     <LinearLayout
+        android:id="@+id/button_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:layout_marginEnd="@dimen/activity_horizontal_margin"
-        android:layout_marginStart="@dimen/activity_horizontal_margin">
+        android:layout_alignParentBottom="true"
+        android:gravity="center_horizontal">
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:id="@+id/add_button"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="2dp"
-            android:id="@+id/add_button"
+            android:layout_weight="33"
             android:background="@android:color/white"
-            android:elevation="4dp">
+            android:gravity="center_horizontal">
 
             <ImageView
                 android:layout_width="50dp"
@@ -40,12 +43,13 @@
         </LinearLayout>
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:id="@+id/remove_button"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="2dp"
-            android:id="@+id/remove_button"
+            android:layout_weight="33"
             android:background="@android:color/white"
-            android:elevation="4dp">
+            android:gravity="center_horizontal">
 
             <ImageView
                 android:layout_width="50dp"
@@ -61,12 +65,13 @@
         </LinearLayout>
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:id="@+id/cancel_button"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="2dp"
-            android:id="@+id/cancel_button"
+            android:layout_weight="33"
             android:background="@android:color/white"
-            android:elevation="4dp">
+            android:gravity="center_horizontal">
 
             <ImageView
                 android:layout_width="50dp"
@@ -83,4 +88,4 @@
 
     </LinearLayout>
 
-</LinearLayout>
+</RelativeLayout>
