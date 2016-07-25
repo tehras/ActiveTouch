@@ -69,7 +69,7 @@ class ActiveTouchBehavior : View.OnTouchListener, ActiveTouchFragment.OnLoadHelp
                 private set
             var hoverCallback: OnViewHoverOverListener? = null
                 private set
-            var blockCallback: BlockScrollableParentListener? = null
+            var popupCallback: OnActiveTouchPopupListener? = null
                 private set
 
             @Suppress("unused")
@@ -79,8 +79,8 @@ class ActiveTouchBehavior : View.OnTouchListener, ActiveTouchFragment.OnLoadHelp
             }
 
             @Suppress("unused")
-            fun setBlockScrollableCallback(callback: BlockScrollableParentListener): ActiveTouchBuilder {
-                blockCallback = callback
+            fun setPopupCallback(callback: OnActiveTouchPopupListener): ActiveTouchBuilder {
+                popupCallback = callback
                 return this
             }
 
@@ -123,6 +123,8 @@ class ActiveTouchBehavior : View.OnTouchListener, ActiveTouchFragment.OnLoadHelp
             builder.v!!.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
             startActiveTouchFragment(builder.parentView!!, builder)
 
+            builder.popupCallback?.onShow()
+
             blockScroll(true)
         }
     }
@@ -135,6 +137,8 @@ class ActiveTouchBehavior : View.OnTouchListener, ActiveTouchFragment.OnLoadHelp
             activeTouchHoverHelper?.clearViews()
             activity!!.onBackPressed()
             lastDialog = null
+
+            builder.popupCallback?.onDismiss()
 
             blockScroll(false)
         }
@@ -149,9 +153,6 @@ class ActiveTouchBehavior : View.OnTouchListener, ActiveTouchFragment.OnLoadHelp
         builder.v!!.parent.requestDisallowInterceptTouchEvent(b) // this blocks recycler view + view Pager from intercepting
 
         isBlocked = b
-        if (builder.blockCallback != null) {
-            builder.blockCallback!!.onBlock(b)
-        }
     }
 
     private fun startActiveTouchFragment(parentViewGroup: ViewGroup, b: ActiveTouchBuilder) {
@@ -187,9 +188,12 @@ class ActiveTouchBehavior : View.OnTouchListener, ActiveTouchFragment.OnLoadHelp
         fun onHover(v: View?, isInside: Boolean)
     }
 
-    interface BlockScrollableParentListener {
+    interface OnActiveTouchPopupListener {
         @Suppress("unused")
-        fun onBlock(b: Boolean)
+        fun onShow()
+
+        @Suppress("unused")
+        fun onDismiss()
     }
 
     var mLongPressed = Runnable { startPopup() }

@@ -1,19 +1,25 @@
 package com.koshkin.tehras.activetouchsample
 
-import android.graphics.Color
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.util.Log
+import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
+import android.widget.Toast
 import com.koshkin.tehras.activetouch.touchlisteners.ActiveTouchBehavior
+import java.util.*
 
-class MainActivity : AppCompatActivity(), ActiveTouchBehavior.BlockScrollableParentListener {
-    override fun onBlock(b: Boolean) {
-//        blockedScroll = b
+class MainActivity : AppCompatActivity(), ActiveTouchBehavior.OnActiveTouchPopupListener {
+    override fun onShow() {
+        idList.clear()
+    }
+
+    override fun onDismiss() {
+        Toast.makeText(this, "Hover over - $idList", Toast.LENGTH_SHORT).show()
     }
 
     private var recyclerView: RecyclerView? = null
@@ -61,17 +67,28 @@ class MainActivity : AppCompatActivity(), ActiveTouchBehavior.BlockScrollablePar
 
     }
 
+    var idList = ArrayList<Int>()
+
     fun addLongHolder(v: View?) {
         ActiveTouchBehavior.Builder(v!!, this.findViewById(R.id.container_view) as ViewGroup)
-                .setBlockScrollableCallback(this)
+                .setPopupCallback(this)
                 .setHoverCallback(object : ActiveTouchBehavior.OnViewHoverOverListener {
 
                     override fun onHover(v: View?, isInside: Boolean) {
-                        if (v != null && v.id == R.id.sample_image && v is ImageView) {
-                            if (isInside)
-                                v.setColorFilter(Color.argb(50, 0, 0, 0))
-                            else
-                                v.setColorFilter(Color.argb(0, 0, 0, 0))
+                        Log.d("MainActivity", "view - ${v?.id} - inside - $isInside")
+                        if (v != null && (v.id == R.id.add_button || v.id == R.id.remove_button || v.id == R.id.cancel_button)) {
+
+                            if (isInside) {
+                                if (!idList.contains(v.id)) {
+                                    idList.add(v.id)
+                                    v.background = this@MainActivity.resources.getDrawable(R.color.colorAccent)
+                                    v.isHapticFeedbackEnabled = true
+                                    v.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                                }
+                            } else {
+                                idList.remove(v.id)
+                                v.background = this@MainActivity.resources.getDrawable(android.R.color.white)
+                            }
                         }
                     }
 
