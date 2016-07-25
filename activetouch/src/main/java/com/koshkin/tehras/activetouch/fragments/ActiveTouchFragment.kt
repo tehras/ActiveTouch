@@ -24,7 +24,7 @@ class ActiveTouchFragment : Fragment() {
         val BUNDLE_BUILDER = "bundle_builder_key"
         val BUNDLE_CALLBACK = "bundle_callback"
 
-        fun getInstance(b: ActiveTouchBehavior.Factory.Builder, callback: OnLoadHelper): ActiveTouchFragment {
+        fun getInstance(b: ActiveTouchBehavior.Factory.ActiveTouchBuilder, callback: OnLoadHelper): ActiveTouchFragment {
             val args = Bundle()
             args.putSerializable(BUNDLE_BUILDER, b)
             args.putSerializable(BUNDLE_CALLBACK, callback)
@@ -35,14 +35,14 @@ class ActiveTouchFragment : Fragment() {
         }
     }
 
-    var builder: ActiveTouchBehavior.Factory.Builder? = null
+    var builder: ActiveTouchBehavior.Factory.ActiveTouchBuilder? = null
     var callback: OnLoadHelper? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         if (arguments != null) {
-            builder = arguments.getSerializable(BUNDLE_BUILDER) as ActiveTouchBehavior.Factory.Builder
+            builder = arguments.getSerializable(BUNDLE_BUILDER) as ActiveTouchBehavior.Factory.ActiveTouchBuilder
             callback = arguments.getSerializable(BUNDLE_CALLBACK) as OnLoadHelper
         }
     }

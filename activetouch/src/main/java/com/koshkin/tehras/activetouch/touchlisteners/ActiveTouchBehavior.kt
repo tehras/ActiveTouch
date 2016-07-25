@@ -21,10 +21,10 @@ class ActiveTouchBehavior : View.OnTouchListener, ActiveTouchFragment.OnLoadHelp
             activeTouchHoverHelper!!.attachView(v)
     }
 
-    private var builder: Builder
+    private var builder: ActiveTouchBuilder
     private var activity: FragmentActivity? = null
 
-    constructor(activity: FragmentActivity, builder: Builder) {
+    constructor(activity: FragmentActivity, builder: ActiveTouchBuilder) {
         this.activity = activity
         this.builder = builder
 
@@ -33,12 +33,12 @@ class ActiveTouchBehavior : View.OnTouchListener, ActiveTouchFragment.OnLoadHelp
     }
 
     companion object Factory {
-        fun builder(v: View): Factory.Builder {
-            return Factory.Builder(v)
+        fun Builder(v: View, contentView: ViewGroup): ActiveTouchBuilder {
+            return Factory.ActiveTouchBuilder(v, contentView)
         }
 
         val TAG = "ActiveTouchBehavior"
-        private fun Builder.attach(activity: FragmentActivity): ActiveTouchBehavior {
+        private fun ActiveTouchBuilder.attach(activity: FragmentActivity): ActiveTouchBehavior {
             //do a check
             if (this.v == null)
                 throw RuntimeException("View cannot be null")
@@ -54,48 +54,51 @@ class ActiveTouchBehavior : View.OnTouchListener, ActiveTouchFragment.OnLoadHelp
             return a
         }
 
-        class Builder(v: View) : Serializable {
+        /**
+         * Builder
+         */
+        open class ActiveTouchBuilder(v: View, parentView: ViewGroup) : Serializable {
             val v: View? = v
+            val parentView: ViewGroup? = parentView
+
             var contentView: View? = null
+                private set
             var contentFragV4: Fragment? = null
+                private set
             var contentFrag: android.app.Fragment? = null
-            var parentView: ViewGroup? = null
+                private set
             var hoverCallback: OnViewHoverOverListener? = null
+                private set
             var blockCallback: BlockScrollableParentListener? = null
+                private set
 
             @Suppress("unused")
-            fun setHoverCallback(callback: OnViewHoverOverListener): Builder {
+            fun setHoverCallback(callback: OnViewHoverOverListener): ActiveTouchBuilder {
                 hoverCallback = callback
                 return this
             }
 
             @Suppress("unused")
-            fun setBlockScrollableCallback(callback: BlockScrollableParentListener): Builder {
+            fun setBlockScrollableCallback(callback: BlockScrollableParentListener): ActiveTouchBuilder {
                 blockCallback = callback
                 return this
             }
 
             @Suppress("unused")
-            fun setContentView(view: View?): Builder {
-                contentView = view
-                return this
-            }
-
-            @Suppress("unused")
-            fun setContentFragment(fragment: Fragment): Builder {
+            fun setContentFragment(fragment: Fragment): ActiveTouchBuilder {
                 contentFragV4 = fragment
                 return this
             }
 
             @Suppress("unused")
-            fun setContentFragment(fragment: android.app.Fragment): Builder {
+            fun setContentFragment(fragment: android.app.Fragment): ActiveTouchBuilder {
                 contentFrag = fragment
                 return this
             }
 
             @Suppress("unused")
-            fun setContainerView(parentView: ViewGroup): Builder {
-                this.parentView = parentView
+            fun setContentView(contentView: ViewGroup): ActiveTouchBuilder {
+                this.contentView = contentView
                 return this
             }
 
@@ -110,6 +113,9 @@ class ActiveTouchBehavior : View.OnTouchListener, ActiveTouchFragment.OnLoadHelp
         builder.v!!.setOnTouchListener(this)
     }
 
+    /**
+     * Show 3D touch Popup
+     */
     fun startPopup() {
         if (builder.parentView != null) {
             //haptic feedback
@@ -121,6 +127,9 @@ class ActiveTouchBehavior : View.OnTouchListener, ActiveTouchFragment.OnLoadHelp
         }
     }
 
+    /**
+     * Hide the 3D touch popup
+     */
     fun hidePopup() {
         if (lastDialog != null && activity != null) {
             activeTouchHoverHelper?.clearViews()
@@ -131,14 +140,21 @@ class ActiveTouchBehavior : View.OnTouchListener, ActiveTouchFragment.OnLoadHelp
         }
     }
 
+    var isBlocked = false
 
+    /**
+     * Block everything from intercepting
+     */
     private fun blockScroll(b: Boolean) {
+        builder.v!!.parent.requestDisallowInterceptTouchEvent(b) // this blocks recycler view + view Pager from intercepting
+
+        isBlocked = b
         if (builder.blockCallback != null) {
             builder.blockCallback!!.onBlock(b)
         }
     }
 
-    private fun startActiveTouchFragment(parentViewGroup: ViewGroup, b: Builder) {
+    private fun startActiveTouchFragment(parentViewGroup: ViewGroup, b: ActiveTouchBuilder) {
         if (activity == null)
             return
 
@@ -163,7 +179,7 @@ class ActiveTouchBehavior : View.OnTouchListener, ActiveTouchFragment.OnLoadHelp
             activeTouchHoverHelper!!.onTouch(ev)
         }
 
-        return com.koshkin.tehras.activetouch.touchlisteners.onTouch(ev, v!!, this, mLongPressed)
+        return com.koshkin.tehras.activetouch.touchlisteners.onTouch(ev, v!!, this, mLongPressed, isBlocked)
     }
 
     interface OnViewHoverOverListener {

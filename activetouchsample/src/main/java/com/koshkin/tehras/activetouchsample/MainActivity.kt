@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,7 +13,7 @@ import com.koshkin.tehras.activetouch.touchlisteners.ActiveTouchBehavior
 
 class MainActivity : AppCompatActivity(), ActiveTouchBehavior.BlockScrollableParentListener {
     override fun onBlock(b: Boolean) {
-        blockedScroll = b
+//        blockedScroll = b
     }
 
     private var recyclerView: RecyclerView? = null
@@ -63,8 +62,7 @@ class MainActivity : AppCompatActivity(), ActiveTouchBehavior.BlockScrollablePar
     }
 
     fun addLongHolder(v: View?) {
-        ActiveTouchBehavior.builder(v!!)
-                .setContainerView(this.findViewById(R.id.container_view) as ViewGroup)
+        ActiveTouchBehavior.Builder(v!!, this.findViewById(R.id.container_view) as ViewGroup)
                 .setBlockScrollableCallback(this)
                 .setHoverCallback(object : ActiveTouchBehavior.OnViewHoverOverListener {
 

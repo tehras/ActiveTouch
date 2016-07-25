@@ -14,7 +14,7 @@ import com.koshkin.tehras.activetouch.fragments.ActiveTouchFragment
 private val LONG_TAP_THRESHOLD = 250L
 var lastDialog: ActiveTouchFragment? = null
 
-fun onTouch(ev: MotionEvent, v: View, a: ActiveTouchBehavior, mLongPressed: Runnable): Boolean {
+fun onTouch(ev: MotionEvent, v: View, a: ActiveTouchBehavior, mLongPressed: Runnable, isBlocked: Boolean): Boolean {
     // this section will keep track of any hover views
     if (maxMovement == -1) {
         maxMovement = (v.measuredHeight.toDouble() * 0.25).toInt()
@@ -48,7 +48,7 @@ fun onTouch(ev: MotionEvent, v: View, a: ActiveTouchBehavior, mLongPressed: Runn
             val thisX = ev.rawX.toInt()
             val thisY = ev.rawY.toInt()
 
-            if (Math.abs(thisX - originX) > maxMovement || Math.abs(thisY - originY) > maxMovement) {
+            if (!isBlocked && (Math.abs(thisX - originX) > maxMovement || Math.abs(thisY - originY) > maxMovement)) {
                 //reset
                 reset(thisX, thisY, mLongPressed)
             }
@@ -70,7 +70,7 @@ private fun reset(x: Int, y: Int, mLongPressed: Runnable) {
 
 private fun isShowing(): Boolean = lastDialog != null
 
-val handler = Handler()
+private val handler = Handler()
 
 private var isInside: Boolean = false
 private var maxMovement = -1
