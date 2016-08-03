@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.koshkin.tehras.activetouch.views.ActiveTouchInterceptorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.github.tehras.activetouch.views.ActiveTouchInterceptorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/transparentGray"
@@ -15,4 +15,4 @@
         android:layout_marginTop="80dp"
         android:orientation="vertical" />
 
-</com.koshkin.tehras.activetouch.views.ActiveTouchInterceptorLayout>
+</com.github.tehras.activetouch.views.ActiveTouchInterceptorLayout>
